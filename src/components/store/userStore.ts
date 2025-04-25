@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 type User = {
   loginId?: string;
+  id?: string;
   nickname?: string | null;
   accessToken?: string;
   profileImageUrl?: string;

@@ -12,9 +12,10 @@ const SessionSync = () => {
   useEffect(() => {
     if (status === "loading") return;
     if (session?.user) {
-      const { loginId, nickname, accessToken, profileImageUrl } =
+      const { loginId, id, nickname, accessToken, profileImageUrl } =
         session.user as {
           loginId: string;
+          id: string;
           nickname?: string;
           accessToken: string;
           profileImageUrl?: string;
@@ -22,6 +23,7 @@ const SessionSync = () => {
 
       setUser({
         loginId,
+        id,
         nickname,
         accessToken,
         profileImageUrl,
