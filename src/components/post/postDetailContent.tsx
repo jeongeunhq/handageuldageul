@@ -2,8 +2,8 @@ import { usePostDetail } from "@/components/widgets/providers/postDetailProvider
 import { faMessage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useUserStore } from "@/components/store/userStore";
-import DeleteModal from "@/components/post/deleteModal"; // DeleteModal 컴포넌트 import
-import Link from "next/link"; // Link 컴포넌트 import
+import DeleteModal from "@/components/post/deleteModal";
+import Link from "next/link";
 
 const PostDetailContent = () => {
   const {

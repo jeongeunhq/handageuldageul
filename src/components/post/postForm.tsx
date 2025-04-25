@@ -33,6 +33,18 @@ const PostForm = () => {
       return;
     }
 
+    if (data.title.length < 1) {
+      setError("제목은 최소 1자 이상 입력해주세요.");
+      setLoading(false);
+      return;
+    }
+
+    if (data.content.length < 5) {
+      setError("내용은 최소 5자 이상 입력해주세요.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post(`/api/board`, data, {
         headers: {
@@ -80,7 +92,11 @@ const PostForm = () => {
             id="content"
             placeholder="내용을 입력해주세요."
             {...register("content", {
-              required: "최소 10자 이상 입력해주세요.",
+              required: "최소 5자 이상 입력해주세요.",
+              minLength: {
+                value: 5,
+                message: "내용은 최소 5자 이상 입력해주세요.",
+              },
               maxLength: {
                 value: 300,
                 message: "300자 이하로 입력해주세요.",
