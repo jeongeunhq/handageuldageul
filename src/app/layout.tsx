@@ -5,6 +5,7 @@ import NextAuthProvider from "@/components/widgets/providers/nextAuthProvider";
 import Header from "@/components/widgets/shared/header";
 import { PostsProvider } from "@/components/widgets/providers/boardProvider";
 import { Toaster } from "react-hot-toast";
+import ReactQueryProvider from "@/components/widgets/providers/reactQueryProvider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,13 +36,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextAuthProvider>
-          <PostsProvider>
-            <Header />
-            <Toaster />
-            {children}
-          </PostsProvider>
-        </NextAuthProvider>
+        <ReactQueryProvider>
+          <NextAuthProvider>
+            <PostsProvider>
+              <Header />
+              <Toaster />
+              {children}
+            </PostsProvider>
+          </NextAuthProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

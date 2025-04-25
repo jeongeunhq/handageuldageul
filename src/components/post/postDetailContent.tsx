@@ -60,7 +60,6 @@ const PostDetailContent = () => {
 
             {user?.id === post.author.id && (
               <div className="text-sm text-gray_500 space-x-2">
-                {/* Link 컴포넌트를 사용하여 수정 페이지로 이동 */}
                 <Link href={`/posts/create?edit=true&id=${post.id}`}>
                   <button>수정</button>
                 </Link>

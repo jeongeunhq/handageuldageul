@@ -1,8 +1,8 @@
-"use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useUserStore } from "@/components/store/userStore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface FormData {
   title: string;
@@ -10,6 +10,14 @@ interface FormData {
 }
 
 const PostForm = () => {
+  const [isClient, setIsClient] = useState(false); // 클라이언트 환경 체크
+  const queryClient = useQueryClient();
+
+  // useRouter를 클라이언트에서만 사용
+  useEffect(() => {
+    setIsClient(true); // 클라이언트 사이드에서만 useRouter 사용
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -23,7 +31,28 @@ const PostForm = () => {
   const accessToken = user?.accessToken;
   const contentValue = watch("content") || "";
 
-  const onSubmit = async (data: FormData) => {
+  // useMutation 훅
+  const postMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      const response = await axios.post(`/api/board`, data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      if (isClient) {
+        window.location.href = "/"; // 클라이언트에서만 페이지 이동
+      }
+    },
+    onError: () => {
+      setError("게시글 작성 중 오류가 발생했습니다.");
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
     setError(null);
     setLoading(true);
 
@@ -45,31 +74,15 @@ const PostForm = () => {
       return;
     }
 
-    try {
-      const response = await axios.post(`/api/board`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (response.status === 201) {
-        window.location.href = "/";
-      } else {
-        setError(response.data.error || "게시글 작성 실패");
-      }
-    } catch (err) {
-      console.error("Error submitting post:", err);
-      setError("게시글 작성 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
+    postMutation.mutate(data);
   };
 
   return (
     <div className="w-full">
       <form
         id="post-form"
-        className=" p-6 bg-white rounded-[10px] border border-gray_300"
+        className="p-6 bg-white rounded-[10px] border border-gray_300"
+        onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-xl font-bold mb-6">게시글 작성</h2>
         <div className="mb-4">
@@ -116,18 +129,17 @@ const PostForm = () => {
             {errors.content.message}
           </p>
         )}
+        <div className="flex justify-center mt-6">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-[200px] h-[59px] py-2 bg-black text-white rounded-xl disabled:opacity-50"
+          >
+            {loading ? "작성 중..." : "등록하기"}
+          </button>
+        </div>
       </form>
-
-      <div className="flex justify-center mt-6">
-        <button
-          type="button"
-          onClick={handleSubmit(onSubmit)}
-          disabled={loading}
-          className="w-[200px] h-[59px] py-2 bg-black text-white rounded-xl disabled:opacity-50"
-        >
-          {loading ? "작성 중..." : "등록하기"}
-        </button>
-      </div>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 };
