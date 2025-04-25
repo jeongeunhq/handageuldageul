@@ -70,7 +70,7 @@ export async function DELETE(
   }
 
   try {
-    const response = await axios.get(
+    const response = await axios.delete(
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/posts/${id}`,
       {
         headers: {

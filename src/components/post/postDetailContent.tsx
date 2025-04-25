@@ -2,9 +2,19 @@ import { usePostDetail } from "@/components/widgets/providers/postDetailProvider
 import { faMessage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useUserStore } from "@/components/store/userStore";
+import DeleteModal from "@/components/post/deleteModal"; // DeleteModal 컴포넌트 import
+import Link from "next/link"; // Link 컴포넌트 import
 
 const PostDetailContent = () => {
-  const { post, loading, error } = usePostDetail();
+  const {
+    post,
+    loading,
+    error,
+    isModalOpen,
+    openDeleteModal,
+    closeDeleteModal,
+    handleDelete,
+  } = usePostDetail();
   const { user } = useUserStore();
 
   if (loading)
@@ -21,9 +31,18 @@ const PostDetailContent = () => {
         <p>해당 게시물을 찾을 수 없습니다.</p>
       </div>
     );
+
   const formattedDate = new Date(post.createdAt)
     .toLocaleDateString("ko-KR")
     .replace(/\.$/, "");
+
+  const renderDeleteModal = isModalOpen ? (
+    <DeleteModal
+      isOpen={isModalOpen}
+      onClose={closeDeleteModal}
+      onConfirm={handleDelete}
+    />
+  ) : null;
 
   return (
     <div className="px-12 mt-6 flex items-center justify-center">
@@ -41,9 +60,12 @@ const PostDetailContent = () => {
 
             {user?.id === post.author.id && (
               <div className="text-sm text-gray_500 space-x-2">
-                <button>수정</button>
+                {/* Link 컴포넌트를 사용하여 수정 페이지로 이동 */}
+                <Link href={`/posts/create?edit=true&id=${post.id}`}>
+                  <button>수정</button>
+                </Link>
                 <span>|</span>
-                <button>삭제</button>
+                <button onClick={openDeleteModal}>삭제</button>
               </div>
             )}
           </div>
@@ -57,6 +79,7 @@ const PostDetailContent = () => {
           </div>
         </div>
       </div>
+      {renderDeleteModal}
     </div>
   );
 };

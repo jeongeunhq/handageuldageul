@@ -31,6 +31,12 @@ interface PostDetailContextType {
   post: PostDetail | null;
   loading: boolean;
   error: string | null;
+  deleting: boolean;
+  deleteError: string | null;
+  isModalOpen: boolean;
+  openDeleteModal: () => void;
+  closeDeleteModal: () => void;
+  handleDelete: () => Promise<void>;
 }
 
 const PostDetailContext = createContext<PostDetailContextType | undefined>(
@@ -56,6 +62,10 @@ export const PostDetailProvider = ({
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { user } = useUserStore();
   const accessToken = user?.accessToken;
 
@@ -70,7 +80,7 @@ export const PostDetailProvider = ({
           },
         });
         setPost(response.data);
-      } catch (err) {
+      } catch (error) {
         setError("게시글을 불러오지 못했습니다.");
       } finally {
         setLoading(false);
@@ -80,8 +90,47 @@ export const PostDetailProvider = ({
     fetchPost();
   }, [id, accessToken]);
 
+  const handleDelete = async () => {
+    if (!id || !accessToken) {
+      setDeleteError("삭제를 진행할 수 없습니다.");
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await axios.delete(`/api/board/${id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      window.location.href = "/";
+    } catch (error) {
+      setDeleteError("게시글 삭제에 실패했습니다.");
+    } finally {
+      setDeleting(false);
+      setIsModalOpen(false);
+    }
+  };
+
+  const openDeleteModal = () => setIsModalOpen(true);
+  const closeDeleteModal = () => setIsModalOpen(false);
+
   return (
-    <PostDetailContext.Provider value={{ post, loading, error }}>
+    <PostDetailContext.Provider
+      value={{
+        post,
+        loading,
+        error,
+        deleting,
+        deleteError,
+        isModalOpen,
+        openDeleteModal,
+        closeDeleteModal,
+        handleDelete,
+      }}
+    >
       {children}
     </PostDetailContext.Provider>
   );
