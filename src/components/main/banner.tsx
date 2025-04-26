@@ -53,11 +53,13 @@ const Banner = () => {
 
   useEffect(() => {
     if (index === totalSlides) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setIndex(0);
       }, 500);
+
+      return () => clearTimeout(timeout);
     }
-  }, [index]);
+  }, [index, totalSlides]);
 
   return (
     <div className="relative overflow-hidden mx-auto mb-10">

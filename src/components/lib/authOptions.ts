@@ -2,8 +2,6 @@ import { AxiosError } from "axios";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
-import type { JWT } from "next-auth/jwt";
-import type { Session } from "next-auth";
 
 interface User {
   id: string;
@@ -13,6 +11,15 @@ interface User {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+interface AuthorizedUser {
+  id: string;
+  loginId: string;
+  nickname: string;
+  profileImageUrl: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -42,7 +49,7 @@ export const authOptions: NextAuthOptions = {
 
           if (!user || !tokens) return null;
 
-          return {
+          const authorizedUser: AuthorizedUser = {
             id: user.id,
             loginId: user.loginId,
             nickname: user.nickname,
@@ -50,6 +57,8 @@ export const authOptions: NextAuthOptions = {
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
           };
+
+          return authorizedUser;
         } catch (err) {
           if (err instanceof AxiosError) {
             console.error("Login error:", err.response?.data);
@@ -64,18 +73,20 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/" },
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+    async jwt(params) {
+      const { token, user } = params;
+
       if (user) {
-        token.id = user.id as string;
-        token.loginId = user.loginId as string;
-        token.nickname = user.nickname as string;
-        token.profileImageUrl = user.profileImageUrl as string;
-        token.accessToken = user.accessToken as string;
-        token.refreshToken = user.refreshToken as string;
+        token.id = user.id;
+        token.loginId = user.loginId;
+        token.nickname = user.nickname;
+        token.profileImageUrl = user.profileImageUrl;
+        token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       session.user = {
         id: token.id as string,
         loginId: token.loginId as string,
@@ -87,5 +98,6 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };

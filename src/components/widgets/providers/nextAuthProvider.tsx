@@ -31,8 +31,7 @@ const SessionSync = () => {
     } else {
       resetUser();
     }
-  }, [session, setUser, resetUser]);
-
+  }, [session, setUser, resetUser, status]);
   return null;
 };
 

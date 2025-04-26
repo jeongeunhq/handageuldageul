@@ -10,11 +10,21 @@ import { useState, useEffect } from "react";
 import Pagination from "@/components/lib/pagination";
 import { useIsMobile } from "@/components/widgets/hooks/useIsMobile";
 
+type Post = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  title: string;
+  viewCount: number;
+  commentCount: number;
+  isAuthor: boolean;
+};
+
 const Board = () => {
   const { user } = useUserStore();
   const isMobile = useIsMobile(); // 모바일 여부
   const [currentPage, setCurrentPage] = useState(1);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const { data, isLoading, error } = usePosts(currentPage);
 
   useEffect(() => {

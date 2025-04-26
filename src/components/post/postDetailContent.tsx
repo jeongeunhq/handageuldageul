@@ -31,8 +31,10 @@ const PostDetailContent = ({ id }: { id: string }) => {
           router.push("/");
         },
       });
-    } catch (err) {
-      alert("게시글 삭제에 실패했습니다.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(`게시글 삭제에 실패했습니다: ${err.message}`);
+      }
     }
   };
 

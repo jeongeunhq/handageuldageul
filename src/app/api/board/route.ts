@@ -31,6 +31,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response.data);
   } catch (error) {
+    console.error("Error in POST /api/posts:", error);
     return NextResponse.json(
       { error: "게시글 불러오기 실패" },
       { status: 500 }
