@@ -1,23 +1,55 @@
 "use client";
 
-import Pagination from "@/components/lib/pagination";
 import { usePosts } from "@/components/widgets/hooks/usePosts";
 import { faMessage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useUserStore } from "@/components/store/userStore";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Pagination from "@/components/lib/pagination";
+import { useIsMobile } from "@/components/widgets/hooks/useIsMobile";
 
 const Board = () => {
   const { user } = useUserStore();
+  const isMobile = useIsMobile(); // 모바일 여부
   const [currentPage, setCurrentPage] = useState(1);
+  const [posts, setPosts] = useState<any[]>([]);
   const { data, isLoading, error } = usePosts(currentPage);
 
-  if (isLoading) return <p className="text-center">불러오는 중...</p>;
+  useEffect(() => {
+    if (data?.items) {
+      setPosts(data.items);
+    }
+  }, [data, currentPage]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      const bottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 10;
+
+      if (
+        bottom &&
+        !isLoading &&
+        data?.meta?.currentPage !== undefined &&
+        data?.meta?.totalPages !== undefined &&
+        data.meta.currentPage < data.meta.totalPages
+      ) {
+        setCurrentPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isMobile, isLoading, data]);
+
+  if (isLoading && currentPage === 1)
+    return <p className="text-center">불러오는 중...</p>;
   if (error) return <p>에러 발생: {(error as Error).message}</p>;
 
-  const posts = data?.items || [];
   const meta = data?.meta || {
     totalItems: 0,
     totalPages: 1,
@@ -91,11 +123,23 @@ const Board = () => {
         </ul>
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={meta.totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {/* 모바일: 스크롤 로딩, PC: 페이지네이션 */}
+      {isMobile ? (
+        isLoading &&
+        currentPage > 1 && (
+          <div className="text-center py-4">불러오는 중...</div>
+        )
+      ) : (
+        <div className="mt-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={meta.totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
