@@ -14,6 +14,12 @@
   }
 }
 
+@media (max-width: 641px) {
+  :root {
+    --background: #ffffff;
+  }
+}
+
 body {
   color: var(--foreground);
   background: var(--background);

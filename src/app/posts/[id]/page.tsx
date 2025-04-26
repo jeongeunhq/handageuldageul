@@ -15,7 +15,7 @@ const PostDetailPage = async ({ params }: PostDetailPageProps) => {
   }
 
   return (
-    <div className="px-0 mt-0 sm:px-12 sm:mt-6 flex flex-col items-center justify-center">
+    <div className="px-0 mt-0 sm:mx-[30px] sm:my-6 md:px-12 md:mt-6 flex flex-col items-center justify-center">
       <div className="w-full bg-white sm:rounded-[10px] border border-gray_300 overflow-hidden">
         <PostDetailContent id={id} />
         <CommentsDetail postId={id} />

@@ -5,7 +5,7 @@ import Board from "@/components/main/board";
 
 export default function Home() {
   return (
-    <main className="my-[100px] mx-[30px] md:mx-[120px]">
+    <main>
       <Introduction />
       <Banner />
       <Board />

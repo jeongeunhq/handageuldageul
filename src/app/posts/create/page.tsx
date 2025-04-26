@@ -20,7 +20,7 @@ const CreatePostPage = () => {
   if (!user) return null;
 
   return (
-    <div className="px-12 mt-6 flex items-center justify-center">
+    <div className=" md:px-[120px] md:mt-6 flex items-center justify-center">
       <PostForm />
     </div>
   );

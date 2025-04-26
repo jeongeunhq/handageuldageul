@@ -6,6 +6,9 @@ import { useCreatePost, FormData } from "@/components/widgets/hooks/usePosts";
 import { usePostDetail } from "@/components/widgets/hooks/usePostDetail";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/components/widgets/hooks/useIsMobile";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 
 const PostForm = () => {
   const router = useRouter();
@@ -18,6 +21,8 @@ const PostForm = () => {
   const accessToken = user?.accessToken;
 
   const [error, setError] = useState<string | null>(null);
+  const [isChanged, setIsChanged] = useState(false);
+  const isMobile = useIsMobile();
 
   const {
     register,
@@ -27,10 +32,14 @@ const PostForm = () => {
     formState: { errors },
   } = useForm<FormData>();
 
+  const titleValue = watch("title") || "";
   const contentValue = watch("content") || "";
 
   const postMutation = useCreatePost();
   const { post, editPost, isEditing } = usePostDetail(postId || "");
+  const handleBack = () => {
+    router.push("/");
+  };
 
   // 수정 모드일 때 폼 초기값 세팅
   useEffect(() => {
@@ -39,6 +48,14 @@ const PostForm = () => {
       setValue("content", post.content);
     }
   }, [isEdit, post, setValue]);
+
+  useEffect(() => {
+    if (isEdit && post) {
+      const isTitleChanged = titleValue !== post.title;
+      const isContentChanged = contentValue !== post.content;
+      setIsChanged(isTitleChanged || isContentChanged);
+    }
+  }, [titleValue, contentValue, post, isEdit]);
 
   const onSubmit = (data: FormData) => {
     setError(null);
@@ -86,12 +103,37 @@ const PostForm = () => {
     <div className="w-full">
       <form
         id="post-form"
-        className="p-6 bg-white rounded-[10px] border border-gray_300"
+        className="p-6 bg-white md:rounded-[10px] md:border-gray_300"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <h2 className="text-xl font-bold mb-6">
-          {isEdit ? "게시글 수정" : "게시글 작성"}
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          {isMobile && (
+            <button onClick={handleBack} className="text-[18px]">
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+          )}
+          <h2 className="text-xl font-bold">
+            {isEdit ? "게시글 수정" : "게시글 작성"}
+          </h2>
+          {isMobile && (
+            <button
+              type="submit"
+              disabled={
+                postMutation.isPending || isEditing || (isEdit && !isChanged)
+              }
+              className="ml-auto  py-2 font-bold  text-black rounded-xl disabled:opacity-50"
+            >
+              {isEdit
+                ? isEditing
+                  ? "수정 중..."
+                  : "수정"
+                : postMutation.isPending
+                ? "작성 중..."
+                : "등록"}
+            </button>
+          )}
+        </div>
+
         <div className="mb-4">
           <input
             id="title"
@@ -136,10 +178,12 @@ const PostForm = () => {
             {errors.content.message}
           </p>
         )}
-        <div className="flex justify-center mt-6">
+        <div className="justify-center mt-6 sm:flex hidden ">
           <button
             type="submit"
-            disabled={postMutation.isPending || isEditing}
+            disabled={
+              postMutation.isPending || isEditing || (isEdit && !isChanged)
+            }
             className="w-[200px] h-[59px] py-2 bg-black text-white rounded-xl disabled:opacity-50"
           >
             {isEdit
@@ -152,7 +196,7 @@ const PostForm = () => {
           </button>
         </div>
       </form>
-      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {error && <p className="text-error mt-4">{error}</p>}
     </div>
   );
 };

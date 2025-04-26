@@ -46,17 +46,21 @@ export const useCreateComment = (postId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: FormData) => {
-      const response = await axios.post(`/api/board/${postId}/comments`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+    mutationFn: async (content: string) => {
+      const response = await axios.post(
+        `/api/board/${postId}/comments`,
+        { content },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
       return response.data;
     },
     onSuccess: async () => {
-      // 댓글 작성 후 댓글 목록을 새로 고침
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
     },
   });
 };

@@ -5,7 +5,7 @@ export function useIsMobile() {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // 모바일 기준
+      setIsMobile(window.innerWidth <= 641); // 모바일 기준
     };
 
     handleResize();

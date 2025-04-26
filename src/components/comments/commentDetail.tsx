@@ -4,6 +4,7 @@ import {
   useComments,
   useCreateComment,
 } from "@/components/widgets/hooks/useComments";
+import { useUserStore } from "@/components/store/userStore";
 
 interface CommentsDetailProps {
   postId: string;
@@ -14,13 +15,19 @@ const CommentsDetail = ({ postId }: CommentsDetailProps) => {
   const [newComment, setNewComment] = useState("");
 
   const { mutate: postComment } = useCreateComment(postId);
+  const { user } = useUserStore();
+  const isLoggedIn = !!user;
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-    const formData = new FormData();
-    formData.append("content", newComment);
-    postComment(formData);
+
+    if (!isLoggedIn) {
+      alert("로그인 후 댓글을 작성할 수 있습니다.");
+      return;
+    }
+
+    postComment(newComment);
 
     setNewComment("");
   };
@@ -45,8 +52,14 @@ const CommentsDetail = ({ postId }: CommentsDetailProps) => {
       ) : (
         <ul>
           {comments?.map((comment) => (
-            <li key={comment.id} className="p-6 border-b border-gray_300">
-              <span className="font-semibold">{comment.user.nickname}</span>
+            <li
+              key={comment.id}
+              className="p-4 sm:p-6 border-b border-gray_300"
+            >
+              <div className="flex items-center space-x-2">
+                <div className="size-6 rounded-full bg-gray-300" />
+                <span className="font-semibold">{comment.user.nickname}</span>
+              </div>
               <p className="mt-4">{comment.content}</p>
               <div className="mt-4 text-sm text-gray-500">
                 {new Intl.DateTimeFormat("ko-KR", {
@@ -69,13 +82,19 @@ const CommentsDetail = ({ postId }: CommentsDetailProps) => {
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="댓글을 통해 자유롭게 의견을 나눠보세요"
-          className="w-full p-3 border-b border-gray-300 rounded-none resize-none"
+          placeholder={
+            isLoggedIn
+              ? "댓글을 통해 자유롭게 의견을 나눠보세요"
+              : "로그인 후 댓글 작성이 가능합니다."
+          }
+          disabled={!isLoggedIn}
+          className="w-full p-3 border-b border-gray-300 rounded-none resize-none bg-white disabled:bg-gray-200"
           style={{ height: "48px" }}
         />
 
         <button
           type="submit"
+          disabled={!isLoggedIn || !newComment.trim()}
           className="w-[89px] h-[52px] py-2 px-4 bg-black text-white rounded-lg disabled:bg-gray-400"
         >
           등록

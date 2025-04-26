@@ -80,6 +80,7 @@ export const usePostDetail = (id: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["post", id] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 

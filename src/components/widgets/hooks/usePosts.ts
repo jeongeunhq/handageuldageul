@@ -53,7 +53,7 @@ export const usePosts = (page: number) => {
       return fetchPosts(page, accessToken);
     },
     enabled: !!accessToken,
-    staleTime: 1000 * 60, // 1분 동안은 캐시 유지
+    staleTime: 1000 * 60,
   });
 };
 
@@ -72,8 +72,8 @@ export const useCreatePost = () => {
       return response.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["posts"] });
-      await queryClient.refetchQueries({ queryKey: ["posts"], type: "active" });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.refetchQueries({ queryKey: ["posts"], type: "active" });
     },
   });
 };

@@ -16,6 +16,7 @@ export default {
         Primary_heavy: "#320397",
         gray_600: "#A7A9B4",
         Label_natural: "#5E616E",
+        Label_alternative: "#A7A9B4",
         gray_300: "#EEEFF1",
         gray_800: "#474953",
         error: "#D11111",

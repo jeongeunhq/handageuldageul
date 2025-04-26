@@ -1,7 +1,7 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useIsMobile } from "@/components/widgets/hooks/useIsMobile";
 
 const slides = [
   {
@@ -36,42 +36,49 @@ const slides = [
 
 const Banner = () => {
   const [index, setIndex] = useState(0);
+  const isMobile = useIsMobile();
   const totalSlides = slides.length;
   const extendedSlides = [...slides, ...slides];
-
   const slideWidth = 319;
   const slideGap = 16;
   const fullSlide = slideWidth + slideGap;
-  const centerOffset = fullSlide * 1.5;
+  const centerOffset = isMobile ? 0 : fullSlide * 1.5;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex((prev) => prev + 1);
+      setIndex(
+        (prev) => (prev + 1) % (isMobile ? totalSlides : totalSlides + 1)
+      );
     }, 2000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [isMobile, totalSlides]);
 
   useEffect(() => {
-    if (index === totalSlides) {
+    if (!isMobile && index === totalSlides) {
       const timeout = setTimeout(() => {
         setIndex(0);
       }, 500);
-
       return () => clearTimeout(timeout);
     }
-  }, [index, totalSlides]);
+  }, [index, totalSlides, isMobile]);
 
   return (
-    <div className="relative overflow-hidden mx-auto mb-10">
+    <div className="relative overflow-hidden mb-10 my-[100px] mx-[16px] md:mx-[30px]">
       <div
         className="flex transition-transform duration-500"
         style={{
-          width: `${extendedSlides.length * fullSlide}px`,
-          transform: `translateX(-${index * fullSlide - centerOffset}px)`,
+          width: isMobile ? "100%" : `${extendedSlides.length * fullSlide}px`,
+          transform: isMobile
+            ? `translateX(-${index * 100}%)`
+            : `translateX(-${index * fullSlide - centerOffset}px)`,
         }}
       >
-        {extendedSlides.map((slide, i) => (
-          <div key={i} className="w-[319px] mr-4 shrink-0">
+        {(isMobile ? slides : extendedSlides).map((slide, i) => (
+          <div
+            key={i}
+            className={isMobile ? "w-full shrink-0" : "w-[319px] mr-4 shrink-0"}
+          >
             <div className="relative h-[391px] rounded-[20px] overflow-hidden shadow-md">
               <Image
                 src={slide.img}
@@ -80,9 +87,9 @@ const Banner = () => {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-black bg-opacity-20" />
-              <div className="absolute inset-0  flex flex-col justify-between p-6 text-white space-y-2">
+              <div className="absolute inset-0 flex flex-col justify-between p-6 text-white space-y-2">
                 <h3 className="text-2xl font-semibold">{slide.title}</h3>
-                <div className="flex flex-col mt-auto border-t pt-4 border-Line_strong ">
+                <div className="flex flex-col mt-auto border-t pt-4 border-Line_strong">
                   <p className="text-[16px] text-gray-300">{slide.subtitle}</p>
                   <p className="text-[16px]">{slide.author}</p>
                 </div>

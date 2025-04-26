@@ -1,14 +1,16 @@
 "use client";
 
 import { usePostDetail } from "@/components/widgets/hooks/usePostDetail";
-import { faMessage } from "@fortawesome/free-solid-svg-icons";
+import { faMessage, faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useUserStore } from "@/components/store/userStore";
+import { useIsMobile } from "@/components/widgets/hooks/useIsMobile";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const PostDetailContent = ({ id }: { id: string }) => {
   const { user } = useUserStore();
+  const isMobile = useIsMobile();
   const accessToken = user?.accessToken;
   const router = useRouter();
 
@@ -22,7 +24,6 @@ const PostDetailContent = ({ id }: { id: string }) => {
     }
 
     const isConfirmed = window.confirm("정말로 게시글을 삭제하시겠습니까?");
-
     if (!isConfirmed) return;
 
     try {
@@ -36,6 +37,10 @@ const PostDetailContent = ({ id }: { id: string }) => {
         alert(`게시글 삭제에 실패했습니다: ${err.message}`);
       }
     }
+  };
+
+  const handleBack = () => {
+    router.push("/");
   };
 
   if (isLoading)
@@ -54,17 +59,23 @@ const PostDetailContent = ({ id }: { id: string }) => {
 
   if (!post) return null;
 
-  const formattedDate = new Date(post!.createdAt)
+  const formattedDate = new Date(post.createdAt)
     .toLocaleDateString("ko-KR")
     .replace(/\.$/, "");
 
   return (
     <div>
-      <div className="p-6 pb-0">
-        <h1 className="text-2xl font-bold mb-6">{post.title}</h1>
+      <div className="p-6 pb-0 flex items-center space-x-4 mb-2">
+        {isMobile && (
+          <button onClick={handleBack} className="text-[18px]">
+            <FontAwesomeIcon icon={faChevronLeft} />
+          </button>
+        )}
+        <h1 className="text-[18px] md:text-2xl font-bold">{post.title}</h1>
       </div>
+
       <div className="w-full border-b pb-6 px-6">
-        <div className="text-[16px] text-gray_600 flex items-center justify-between w-full">
+        <div className="text-[14px] md:text-[16px] text-gray_600 flex items-center justify-between w-full">
           <div className="flex items-center space-x-2">
             <p>{post.author.nickname}</p>
             <span>|</span>
