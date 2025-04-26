@@ -85,3 +85,55 @@ export async function DELETE(
     return NextResponse.json({ error: "게시글 삭제 실패" }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+
+  if (!id) {
+    return NextResponse.json(
+      { error: "ID 파라미터가 필요합니다" },
+      { status: 400 }
+    );
+  }
+
+  const accessToken = request.headers
+    .get("authorization")
+    ?.replace("Bearer ", "");
+
+  if (!accessToken) {
+    return NextResponse.json(
+      { error: "Access token이 필요합니다" },
+      { status: 401 }
+    );
+  }
+
+  const body = await request.json();
+  const { title, content } = body;
+
+  if (!title || !content) {
+    return NextResponse.json(
+      { error: "title과 content는 필수입니다" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const response = await axios.patch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/posts/${id}`,
+      { title, content },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    return NextResponse.json(response.data);
+  } catch (error) {
+    console.error("게시글 수정 실패:", error);
+    return NextResponse.json({ error: "게시글 수정 실패" }, { status: 500 });
+  }
+}

@@ -1,80 +1,85 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import axios from "axios";
-import { useUserStore } from "@/components/store/userStore";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+"use client";
 
-interface FormData {
-  title: string;
-  content: string;
-}
+import { useForm } from "react-hook-form";
+import { useUserStore } from "@/components/store/userStore";
+import { useCreatePost, FormData } from "@/components/widgets/hooks/usePosts";
+import { usePostDetail } from "@/components/widgets/hooks/usePostDetail";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const PostForm = () => {
-  const [isClient, setIsClient] = useState(false); // 클라이언트 환경 체크
-  const queryClient = useQueryClient();
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // useRouter를 클라이언트에서만 사용
-  useEffect(() => {
-    setIsClient(true); // 클라이언트 사이드에서만 useRouter 사용
-  }, []);
+  const postId = searchParams.get("id");
+  const isEdit = searchParams.get("edit") === "true";
+
+  const { user } = useUserStore();
+  const accessToken = user?.accessToken;
+
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    setValue,
     watch,
     formState: { errors },
   } = useForm<FormData>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const { user } = useUserStore();
-  const accessToken = user?.accessToken;
   const contentValue = watch("content") || "";
 
-  // useMutation 훅
-  const postMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      const response = await axios.post(`/api/board`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      if (isClient) {
-        window.location.href = "/"; // 클라이언트에서만 페이지 이동
-      }
-    },
-    onError: () => {
-      setError("게시글 작성 중 오류가 발생했습니다.");
-    },
-  });
+  const postMutation = useCreatePost();
+  const { post, editPost, isEditing } = usePostDetail(postId || "");
+
+  // 수정 모드일 때 폼 초기값 세팅
+  useEffect(() => {
+    if (isEdit && post) {
+      setValue("title", post.title);
+      setValue("content", post.content);
+    }
+  }, [isEdit, post, setValue]);
 
   const onSubmit = (data: FormData) => {
     setError(null);
-    setLoading(true);
 
     if (!accessToken) {
       setError("로그인이 필요합니다.");
-      setLoading(false);
       return;
     }
 
     if (data.title.length < 1) {
       setError("제목은 최소 1자 이상 입력해주세요.");
-      setLoading(false);
       return;
     }
 
     if (data.content.length < 5) {
       setError("내용은 최소 5자 이상 입력해주세요.");
-      setLoading(false);
       return;
     }
 
-    postMutation.mutate(data);
+    if (isEdit && postId) {
+      // 수정 모드
+      editPost(data, {
+        onSuccess: () => {
+          router.push(`/posts/${postId}`);
+        },
+        onError: () => {
+          setError("게시글 수정 중 오류가 발생했습니다.");
+        },
+      });
+    } else {
+      // 작성 모드
+      postMutation.mutate(data, {
+        onSuccess: () => {
+          router.push("/");
+          router.refresh();
+        },
+        onError: () => {
+          setError("게시글 작성 중 오류가 발생했습니다.");
+        },
+      });
+    }
   };
 
   return (
@@ -84,7 +89,9 @@ const PostForm = () => {
         className="p-6 bg-white rounded-[10px] border border-gray_300"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <h2 className="text-xl font-bold mb-6">게시글 작성</h2>
+        <h2 className="text-xl font-bold mb-6">
+          {isEdit ? "게시글 수정" : "게시글 작성"}
+        </h2>
         <div className="mb-4">
           <input
             id="title"
@@ -132,10 +139,16 @@ const PostForm = () => {
         <div className="flex justify-center mt-6">
           <button
             type="submit"
-            disabled={loading}
+            disabled={postMutation.isPending || isEditing}
             className="w-[200px] h-[59px] py-2 bg-black text-white rounded-xl disabled:opacity-50"
           >
-            {loading ? "작성 중..." : "등록하기"}
+            {isEdit
+              ? isEditing
+                ? "수정 중..."
+                : "수정하기"
+              : postMutation.isPending
+              ? "작성 중..."
+              : "등록하기"}
           </button>
         </div>
       </form>

@@ -12,6 +12,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         gray_900: "#000000",
+        gray_100: "#F9FAFA",
         Primary_heavy: "#320397",
         gray_600: "#A7A9B4",
         Label_natural: "#5E616E",

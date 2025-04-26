@@ -6,24 +6,20 @@ import { useUserStore } from "@/components/store/userStore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleUser } from "@fortawesome/free-solid-svg-icons";
 import { signOut } from "next-auth/react";
-import LogoutModal from "@/components/widgets/shared/logoutModal";
 
 const Header = () => {
   const { user } = useUserStore();
   const [isPopover, setPopover] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const togglePopover = () => setPopover((prev) => !prev);
 
   const handleLogoutClick = () => {
     setPopover(false);
-    setShowLogoutModal(true);
-  };
-  const handleCancelLogout = () => setShowLogoutModal(false);
-  const handleConfirmLogout = () => {
-    setShowLogoutModal(false);
-    signOut();
+    const isConfirmed = window.confirm("로그아웃 하시겠습니까?");
+    if (isConfirmed) {
+      signOut();
+    }
   };
 
   useEffect(() => {
@@ -98,13 +94,6 @@ const Header = () => {
           )}
         </div>
       </div>
-
-      {/* 로그아웃 모달 */}
-      <LogoutModal
-        show={showLogoutModal}
-        onCancel={handleCancelLogout}
-        onConfirm={handleConfirmLogout}
-      />
     </header>
   );
 };

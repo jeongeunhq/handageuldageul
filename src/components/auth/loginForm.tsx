@@ -1,9 +1,7 @@
 "use client";
-
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
-import ErrorModal from "@/components/widgets/shared/errorModal";
+
 type LoginFormInputs = {
   loginId: string;
   password: string;
@@ -16,8 +14,6 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormInputs>();
 
-  const [showErrorModal, setShowErrorModal] = useState(false);
-
   const onSubmit = async (data: LoginFormInputs) => {
     const result = await signIn("credentials", {
       redirect: false,
@@ -29,7 +25,7 @@ export default function LoginForm() {
     if (result?.ok) {
       window.location.href = result.url || "/";
     } else {
-      setShowErrorModal(true); // 로그인 실패 시 모달 띄우기
+      alert("로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.");
     }
   };
 
@@ -40,7 +36,7 @@ export default function LoginForm() {
         <span className="text-Primary_heavy">한다글다글</span>입니다.
       </p>
       <p className="text-[16px] text-gray_600 font-semibold mb-4 text-left">
-        로그인을 통해 더 많은 기능을 이용하세요
+        로그인을 통해 더 많은 기능을 이용하세요.
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -83,12 +79,6 @@ export default function LoginForm() {
           로그인
         </button>
       </form>
-
-      {/* 로그인 실패 시 모달 */}
-      <ErrorModal
-        show={showErrorModal}
-        onClose={() => setShowErrorModal(false)}
-      />
     </div>
   );
 }

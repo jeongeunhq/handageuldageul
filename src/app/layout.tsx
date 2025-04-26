@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import NextAuthProvider from "@/components/widgets/providers/nextAuthProvider";
 import Header from "@/components/widgets/shared/header";
-import { PostsProvider } from "@/components/widgets/providers/boardProvider";
 import { Toaster } from "react-hot-toast";
 import ReactQueryProvider from "@/components/widgets/providers/reactQueryProvider";
 
@@ -38,11 +37,9 @@ export default function RootLayout({
       >
         <ReactQueryProvider>
           <NextAuthProvider>
-            <PostsProvider>
-              <Header />
-              <Toaster />
-              {children}
-            </PostsProvider>
+            <Header />
+            <Toaster />
+            {children}
           </NextAuthProvider>
         </ReactQueryProvider>
       </body>
