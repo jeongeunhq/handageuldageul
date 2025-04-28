@@ -30,7 +30,7 @@
 - **Tailwind CSS** (v3)
 - **Axios** (API 통신)
 - **React Hook Form** (폼 관리)
-- **Zustand** (상태 관리)
+- **Zustand** (전역 상태 관리)
 - **Tanstack query** （서버 상태 관리）
   
 ---
