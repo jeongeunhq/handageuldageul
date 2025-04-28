@@ -60,6 +60,7 @@ export const useCreateComment = (postId: string) => {
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
     },
   });

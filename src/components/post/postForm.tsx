@@ -106,7 +106,7 @@ const PostForm = () => {
         className="p-6 bg-white md:rounded-[10px] md:border-gray_300"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between gap-2 mb-6">
           {isMobile && (
             <button onClick={handleBack} className="text-[18px]">
               <FontAwesomeIcon icon={faChevronLeft} />

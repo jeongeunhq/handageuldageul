@@ -65,7 +65,7 @@ const PostDetailContent = ({ id }: { id: string }) => {
 
   return (
     <div>
-      <div className="p-6 pb-0 flex items-center space-x-4 mb-2">
+      <div className="p-6 pb-0 flex items-center space-x-2 mb-2">
         {isMobile && (
           <button onClick={handleBack} className="text-[18px]">
             <FontAwesomeIcon icon={faChevronLeft} />
